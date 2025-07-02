@@ -1,68 +1,52 @@
-import { Producer, ProducerGlobalConfig } from 'node-rdkafka';
+import { Kafka } from 'kafkajs';
 import { StreamProcessor } from './StreamProcessor';
 import { RawMarketMessage, RawTradeMessage } from './types';
 
 type RawMessage = RawMarketMessage | RawTradeMessage;
 
-const producerConfig: ProducerGlobalConfig = {
-    'metadata.broker.list': 'kafka:9092',
-    'dr_cb': true,  // Delivery report callback
-};
-
-const producer = new Producer(producerConfig);
-
-producer.on('event.error', (err) => {
-    console.error('Error from producer:', err);
+const kafka = new Kafka({
+	clientId: 'kafka-producer',
+	brokers: ['kafka:9092'],
 });
 
-producer.on('ready', () => {
-    console.log('Kafka Producer is ready');
-    fetchStreamAndProduce()
-        .then(() => {
-            console.log('Stream processing completed');
-        })
-        .catch((error) => {
-            console.error('Stream processing failed:', error);
-        }
-        );
-});
+const producer = kafka.producer();
 
-function onMessage(message: RawMessage) {
-    producer.produce(
-        message.messageType,
-        null,
-        Buffer.from(JSON.stringify(message)),
-        null,
-        Date.now()
-    );
+async function onMessage(message: RawMessage) {
+	let topic: string = message.messageType;
+	if (topic === 'market') topic = 'market-data';
+	await producer.send({
+		topic,
+		messages: [{ value: JSON.stringify(message) }],
+	});
 }
 
 async function fetchStreamAndProduce() {
-    const response = await fetch('https://t1-coding-challenge-9snjm.ondigitalocean.app/stream');
+	const response = await fetch(
+		'https://t1-coding-challenge-9snjm.ondigitalocean.app/stream',
+	);
 
-    if (!response.ok) {
-        console.error('Failed to fetch stream:', response.statusText);
-        return;
-    }
+	if (!response.ok) {
+		console.error('Failed to fetch stream:', response.statusText);
+		return;
+	}
 
-    if (!response.body) {
-        console.error('Response body is null');
-        return;
-    }
+	if (!response.body) {
+		console.error('Response body is null');
+		return;
+	}
 
-    const streamProcessor = new StreamProcessor(onMessage);
+	const streamProcessor = new StreamProcessor(onMessage);
 
-    await streamProcessor.processStream(response.body);
+	await streamProcessor.processStream(response.body);
 
-    console.log('Streaming ended');
-    producer.disconnect();
-};
+	console.log('Streaming ended');
+	await producer.disconnect();
+}
 
-producer.connect({}, (err, metaData) => {
-    if (err) {
-        console.error('Error connecting to Kafka:', err);
-        return;
-    }
+async function run() {
+	await producer.connect();
+	console.log('Kafka Producer is ready');
+	await fetchStreamAndProduce();
+}
 
-    console.log('Connected to Kafka:', metaData);
-});
+run().catch(console.error);
