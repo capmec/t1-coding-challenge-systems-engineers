@@ -5,5 +5,13 @@
   "scripts": {
     "start": "docker-compose up",
     "kafka:setup": "./kafka-setup.sh"
+  },
+  "devDependencies": {
+    "@types/mongoose": "^5.11.96"
+  },
+  "dependencies": {
+    "@types/dotenv": "^6.1.1",
+    "dotenv": "^17.0.1",
+    "kafkajs": "^2.2.4"
   }
 }

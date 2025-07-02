@@ -3,7 +3,7 @@ services:
     container_name: t1-coding-challenge-database
     image: mongo:4.4.3
     ports:
-      - "27017:27017"
+      - '27017:27017'
 
   zookeeper:
     container_name: t1-coding-challenge-zookeeper
@@ -11,15 +11,15 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     ports:
-      - "2181:2181"
+      - '2181:2181'
 
   kafka:
     container_name: t1-coding-challenge-kafka
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.4.0
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"
+      - '9092:9092'
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
@@ -35,7 +35,7 @@ services:
     container_name: t1-coding-challenge-frontend-service
     build: ./frontend-service
     ports:
-      - "3001:3001"
+      - '3001:3001'
     depends_on:
       - kafka-producer
 
@@ -56,6 +56,6 @@ services:
       - ./frontend:/app
       - /app/node_modules
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       - frontend-service
