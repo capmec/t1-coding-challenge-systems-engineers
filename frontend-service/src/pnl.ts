@@ -1,8 +1,18 @@
-import { PnL } from "./types";
+import { connectToDatabase } from './db';
+import { PnL } from './types';
 
-export function getPnls(): Array<PnL> {
+export async function getPnls(): Promise<Array<PnL>> {
+	// YOUR CODE HERE
+	const db = await connectToDatabase();
+	const results = await db
+		.collection('calculationresults')
+		.find()
+		.sort({ startTime: -1 })
+		.toArray();
 
-    // YOUR CODE HERE
-
-    return []
+	return results.map((doc: any) => ({
+		startTime: doc.startTime,
+		endTime: doc.endTime,
+		pnl: doc.profitLoss,
+	}));
 }
