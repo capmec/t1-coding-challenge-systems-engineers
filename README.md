@@ -3,236 +3,253 @@
 ## Overview
 
 This project implements a scalable, event-driven architecture using **Node.js**
-and **TypeScript** for processing high-throughput financial market messages. The
-system consists of two microservices that handle profit/loss calculations and
+and **TypeScript** to process high-throughput financial market messages. It
+consists of microservices that handle real-time profit/loss calculations and
 data streaming to a frontend application.
+
+---
 
 ## Architecture
 
-The system is built around two core microservices:
+### 1. Calculation Service
 
-### 1. CalculationService
-
-- **Purpose**: Calculates profit/loss for trading timeframes using market data
+- **Purpose:** Calculates profit/loss for trading timeframes using market data
   and trade volumes
-- **Scalability**: Runs multiple instances with Kafka consumer groups to ensure
+- **Scalability:** Runs multiple instances with Kafka consumer groups to ensure
   each message is processed only once
-- **Data Flow**: Consumes from `market-data` and `trades` Kafka topics, stores
-  results in MongoDB
+- **Data Flow:** Consumes messages from `market-data` and `trades` Kafka topics,
+  stores results in MongoDB
 
-### 2. FrontendService
+### 2. Frontend Service
 
-- **Purpose**: Fetches calculated profit/loss data from the database and streams
+- **Purpose:** Fetches calculated profit/loss data from the database and streams
   it to the frontend
-- **Technology**: Next.js frontend with real-time data updates
-- **API**: Provides REST endpoints for data retrieval
+- **Technology:** Next.js frontend with real-time data updates
+- **API:** Provides REST endpoints and server-sent events for live data
+  streaming
+
+---
 
 ## Technology Stack
 
-- **Backend**: Node.js, TypeScript
-- **Message Broker**: Apache Kafka (using KafkaJS library)
-- **Database**: MongoDB
-- **Frontend**: Next.js, React
-- **Containerization**: Docker & Docker Compose
-- **Process Management**: PM2 for production-ready process management
+- **Backend:** Node.js, TypeScript
+- **Message Broker:** Apache Kafka (using KafkaJS library)
+- **Database:** MongoDB
+- **Frontend:** Next.js, React
+- **Containerization:** Docker & Docker Compose
+- **Process Management:** PM2
 
-## Important Technical Notes
+---
 
-### Windows Compatibility
+## Windows Compatibility
 
-Due to compatibility issues with the `node-rdkafka` library on Windows systems,
-this implementation uses **KafkaJS** where applicable. KafkaJS provides:
+Due to known compatibility issues with the `node-rdkafka` library on Windows,
+this implementation uses **KafkaJS** where applicable:
 
-- Better Windows compatibility
-- Pure JavaScript implementation (no native bindings)
-- Excellent TypeScript support
-- Robust consumer group management for scaling
+✅ Better Windows compatibility ✅ Pure JavaScript implementation ✅ Excellent
+TypeScript support ✅ Robust consumer group management
 
-This ensures the application runs reliably across different development
-environments while maintaining the required functionality.
+---
 
 ## Message Schemas
 
-### Market Data Messages
+### Market Data Message
 
 ```json
 {
-  "messageType": "market",
-  "buyPrice": "-243.0",
-  "sellPrice": "-186.0",
-  "startTime": "2024-08-29T14:47:13.815Z",
-  "endTime": "2024-08-29T14:47:16.820Z"
+	"messageType": "market",
+	"buyPrice": "-243.0",
+	"sellPrice": "-186.0",
+	"startTime": "2024-08-29T14:47:13.815Z",
+	"endTime": "2024-08-29T14:47:16.820Z"
 }
-Trade Messages
-json
-Copy
-Edit
+```
+
+### Trade Message
+
+```json
 {
-  "messageType": "trades",
-  "tradeType": "BUY",
-  "volume": "0.2",
-  "time": "2024-01-01T19:00:00.000+00:00"
+	"messageType": "trades",
+	"tradeType": "BUY",
+	"volume": "0.2",
+	"time": "2024-01-01T19:00:00.000Z"
 }
-Prerequisites
-Ensure the following are installed:
+```
 
-Node.js (v18 or higher)
+---
 
-Docker and Docker Compose
+## Prerequisites
 
-npm or yarn
+- Node.js (v18 or higher)
+- Docker & Docker Compose
+- npm or yarn
+- Git
 
-Git
+---
 
-Quick Start
-1. Clone the Repository
-bash
-Copy
-Edit
+## Quick Start
+
+### 1. Clone the Repository
+
+```bash
 git clone https://github.com/capmec/t1-coding-challenge-systems-engineers.git
 cd t1-coding-challenge-systems-engineers
-2. Install Dependencies
-bash
-Copy
-Edit
+```
+
+### 2. Install Dependencies
+
+```bash
 cd calculation-service
 npm install
 cd ../frontend-service
 npm install
 cd ..
-3. Start the System
-bash
-Copy
-Edit
+```
+
+### 3. Start the System
+
+```bash
 docker-compose up -d --build
-This starts:
+```
 
-Kafka and Zookeeper
+### 4. Kafka Setup
 
-MongoDB
+```bash
+npm run kafka:setup
+```
 
-Calculation service instances
+---
 
-Frontend service
+## Access the Application
 
-Kafka producer for sample data
+- Frontend: [http://localhost:3000](http://localhost:3000)
+- MongoDB: `localhost:27017`
+- Kafka: `localhost:9092`
 
-4. Access the Application
-Frontend: http://localhost:3000
+---
 
-MongoDB: localhost:27017
+## Project Structure
 
-Kafka: localhost:9092
+```
+├── calculation-service/      # Profit/Loss calculation microservice
+├── frontend-service/         # Frontend and API service
+├── kafka-producer/           # Sample data generator
+├── docker-compose.yml        # Service orchestration
+└── package.json              # Root configuration
+```
 
-Project Structure
-graphql
-Copy
-Edit
-├── calculation-service/          # Profit/Loss calculation microservice
-│   ├── src/
-│   ├── Dockerfile
-│   └── package.json
-├── frontend-service/             # Frontend and API service
-│   ├── src/
-│   ├── Dockerfile
-│   └── package.json
-├── kafka-producer/               # Sample data generator
-│   ├── src/
-│   ├── Dockerfile
-│   └── package.json
-├── docker-compose.yml            # Service orchestration
-└── package.json                  # Root package configuration
-Key Features
-Scalability
-Multiple CalculationService instances with Kafka consumer groups
+---
 
-Load distribution ensures no duplicate processing
+## Key Features
 
-Horizontal scaling is straightforward
+### Scalability
 
-Fault Tolerance
-Automatic Kafka partition rebalancing
+- Multiple calculation-service instances with Kafka consumer groups
+- Load distribution prevents duplicate processing
+- Easy horizontal scaling
 
-Persistent results in MongoDB
+### Fault Tolerance
 
-Error handling and logging throughout
+- Automatic Kafka partition rebalancing
+- Persistent data storage in MongoDB
+- Comprehensive error handling and logging
 
-Real-time Processing
-Event-driven architecture for low-latency updates
+### Real-Time Processing
 
-Live profit/loss updates to frontend
+- Event-driven architecture for low-latency updates
+- Live profit/loss updates to frontend
+- High throughput optimized for large message volumes
 
-High throughput optimized for large message volumes
+---
 
-Development
-Tests
-bash
-Copy
-Edit
-# Run tests for a specific service
+## Development
+
+### Run Tests
+
+```bash
 cd calculation-service
 npm test
-Debugging
-bash
-Copy
-Edit
+```
+
+### Debugging
+
+```bash
 DEBUG=* npm start
-Code Quality
-bash
-Copy
-Edit
+```
+
+### Code Quality
+
+```bash
 npm run lint
 npm run format
 npm run type-check
-Monitoring
-Health Checks
-Calculation Service: http://localhost:3001/health
+```
 
-Frontend Service: http://localhost:3000/api/health
+---
 
-Logs
-bash
-Copy
-Edit
+## Monitoring & Logs
+
+### Health Checks
+
+- Calculation Service:
+  [http://localhost:3001/health](http://localhost:3001/health)
+- Frontend Service:
+  [http://localhost:3000/api/health](http://localhost:3000/api/health)
+
+### Logs
+
+```bash
 docker-compose logs -f
 docker-compose logs -f calculation-service
-Troubleshooting
-Port Conflicts
-Modify ports in docker-compose.yml if needed:
+```
 
-yaml
-Copy
-Edit
+---
+
+## Troubleshooting
+
+### Port Conflicts
+
+Modify `docker-compose.yml` ports if needed:
+
+```yaml
 ports:
-  - "3001:3000"
-Kafka Connection Issues
-Ensure containers are running: docker-compose ps
+  - '3001:3000'
+```
 
-Check logs: docker-compose logs kafka
+### Kafka Issues
 
-Database Connection Issues
-Confirm MongoDB is running: docker-compose ps
+```bash
+docker-compose ps
+docker-compose logs kafka
+```
 
-Verify connection strings
+### MongoDB Issues
 
-Contributing
-Fork the repo
+```bash
+docker-compose ps
+```
 
-Create a feature branch: git checkout -b feature/new-feature
+---
 
-Commit changes
+## Contributing
 
-Push and open a PR
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Open a pull request
 
-License
-This project is licensed under the MIT License.
+---
 
-Support
+## License
+
+MIT License
+
+---
+
+## Support
+
 For questions:
 
-Check Troubleshooting
-
-Review GitHub issues
-
-Contact @capmec
-```
+- Check Troubleshooting
+- Review GitHub Issues
+- Contact the capmec@gmail.com
