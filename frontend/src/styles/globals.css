@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.scrollbar-hide::-webkit-scrollbar {
+	display: none;
+}
+.scrollbar-hide {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+/* Custom scrollbar for .scrollbar-purple */
+.scrollbar-purple::-webkit-scrollbar {
+	width: 10px;
+}
+.scrollbar-purple::-webkit-scrollbar-track {
+	border-radius: 8px;
+	background-color: transparent;
+	border: none;
+}
+.scrollbar-purple::-webkit-scrollbar-thumb {
+	border-radius: 8px;
+	background-color: #cc66ff;
+}
+.scrollbar-purple {
+	scrollbar-width: thin;
+	scrollbar-color: #cc66ff transparent;
+}

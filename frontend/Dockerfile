@@ -32,4 +32,4 @@ FROM base AS dev
 ENV NODE_ENV=development
 RUN npm ci
 COPY . .
-CMD npm run dev
+CMD ["npm", "run", "dev"]

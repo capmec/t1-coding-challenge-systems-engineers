@@ -31,12 +31,37 @@ async function startConsumer() {
 				}
 
 				const tradeMessage = toTradeMessage(parsed);
-				if (tradeMessage.tradeType === 'BUY') {
+
+				// Log the trade message for debugging
+				console.log(
+					'Received trade message:',
+					JSON.stringify(tradeMessage, null, 2),
+				);
+
+				// Normalize trade type to handle case sensitivity and potential whitespace
+				const normalizedTradeType = tradeMessage.tradeType
+					?.toString()
+					.trim()
+					.toUpperCase();
+
+				if (normalizedTradeType === 'BUY') {
 					buyVolume += tradeMessage.volume;
-				} else if (tradeMessage.tradeType === 'SELL') {
+					console.log(
+						`Added BUY volume: ${tradeMessage.volume}, Total buy volume: ${buyVolume}`,
+					);
+				} else if (normalizedTradeType === 'SELL') {
 					sellVolume += tradeMessage.volume;
+					console.log(
+						`Added SELL volume: ${tradeMessage.volume}, Total sell volume: ${sellVolume}`,
+					);
 				} else {
-					throw new Error('Invalid trade type');
+					// Instead of throwing an error, log the issue and continue processing
+					console.warn(
+						`Unknown trade type: "${tradeMessage.tradeType}" (normalized: "${normalizedTradeType}")`,
+					);
+					console.warn('Full message:', JSON.stringify(tradeMessage, null, 2));
+					// Don't throw an error - just skip this message
+					return;
 				}
 			},
 		});
